@@ -85,39 +85,20 @@
 
     function enviarCredencialParaSGEEA(response) {
 
-  if (!response || !response.credential) {
-    mostrarMensagem('Não foi possível obter a credencial do Google.');
-    return;
-  }
-
-  mostrarMensagem(
-    '✅ LOGIN GOOGLE REALIZADO COM SUCESSO!\n\n' +
-    'A credencial foi recebida corretamente pelo GitHub Pages.'
-  );
-
-  console.log('Credencial recebida pelo Google Identity Services:', response.credential);
-}
-
-      mostrarMensagem('Login realizado. Retornando ao SGEEA...');
-
-      if (!window.opener || window.opener.closed) {
-        mostrarMensagem(
-          'A janela do SGEEA não está disponível. Feche esta janela e tente novamente.'
-        );
+      if (!response || !response.credential) {
+        mostrarMensagem('Não foi possível obter a credencial do Google.');
         return;
       }
 
-      window.opener.postMessage(
-        {
-          type: 'SGEEA_GOOGLE_TOKEN',
-          credential: response.credential
-        },
-        '*'
+      mostrarMensagem(
+        '✅ LOGIN GOOGLE REALIZADO COM SUCESSO!\n\n' +
+        'A credencial foi recebida corretamente pelo GitHub Pages.'
       );
 
-      setTimeout(function() {
-        window.close();
-      }, 500);
+      console.log(
+        'Credencial recebida pelo Google Identity Services:',
+        response.credential
+      );
     }
 
     function iniciarGoogle() {
