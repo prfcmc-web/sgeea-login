@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SGEEA - Login</title>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      background: #173f63;
+    }
+
+    .card {
+      width: 360px;
+      max-width: calc(100% - 32px);
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .titulo {
+      color: #173f63;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    #mensagem {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+      min-height: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="titulo">SGEEA</div>
+
+    <div class="subtitulo">
+      Autenticação segura do sistema
+    </div>
+
+    <div id="googleLogin"></div>
+
+    <div id="mensagem">
+      Aguarde...
+    </div>
+
+  </div>
+
+  <script>
+
+    const SGEA_GOOGLE_CLIENT_ID =
+      '83579811684-en1bqc7kfn490567vchj82eqrtdjq8ku.apps.googleusercontent.com';
+
+    function mostrarMensagem(texto) {
+      const el = document.getElementById('mensagem');
+      if (el) el.textContent = texto;
+    }
+
+    function enviarCredencialParaSGEEA(response) {
+
+      if (!response || !response.credential) {
+        mostrarMensagem('Não foi possível obter a credencial do Google.');
+        return;
+      }
+
+      mostrarMensagem('Login realizado. Retornando ao SGEEA...');
+
+      if (!window.opener || window.opener.closed) {
+        mostrarMensagem(
+          'A janela do SGEEA não está disponível. Feche esta janela e tente novamente.'
+        );
+        return;
+      }
+
+      window.opener.postMessage(
+        {
+          type: 'SGEEA_GOOGLE_TOKEN',
+          credential: response.credential
+        },
+        '*'
+      );
+
+      setTimeout(function() {
+        window.close();
+      }, 500);
+    }
+
+    function iniciarGoogle() {
+
+      if (!window.google || !google.accounts || !google.accounts.id) {
+        setTimeout(iniciarGoogle, 300);
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: SGEA_GOOGLE_CLIENT_ID,
+        callback: enviarCredencialParaSGEEA,
+        auto_select: false,
+        cancel_on_tap_outside: false,
+        ux_mode: 'popup',
+        use_fedcm_for_button: false
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('googleLogin'),
+        {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'rectangular',
+          width: 300
+        }
+      );
+
+      mostrarMensagem('Entre com sua conta Google.');
+    }
+
+    window.addEventListener('load', iniciarGoogle);
+
+  </script>
+
+</body>
+</html>
