@@ -52,6 +52,13 @@
       color: #666;
       min-height: 20px;
     }
+
+    #enviando {
+      display: none;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #173f63;
+    }
   </style>
 </head>
 
@@ -71,6 +78,10 @@
       Aguarde...
     </div>
 
+    <div id="enviando">
+      Enviando credencial ao SGEEA...
+    </div>
+
   </div>
 
   <script>
@@ -78,61 +89,159 @@
     const SGEA_GOOGLE_CLIENT_ID =
       '83579811684-en1bqc7kfn490567vhcj82eqrtjdq8ku.apps.googleusercontent.com';
 
+    const SGEEA_WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxhIvVNG1xBx-AdlkibKWnxEZdWJ0c6ezr0r_J-2pgEsHTQnCSZs6HgmLF2SBV63vCbeQ/exec';
+
+
     function mostrarMensagem(texto) {
       const el = document.getElementById('mensagem');
-      if (el) el.textContent = texto;
+
+      if (el) {
+        el.textContent = texto;
+      }
     }
+
 
     function enviarCredencialParaSGEEA(response) {
 
       if (!response || !response.credential) {
-        mostrarMensagem('Não foi possível obter a credencial do Google.');
+
+        mostrarMensagem(
+          'Não foi possível obter a credencial do Google.'
+        );
+
         return;
       }
 
+
       mostrarMensagem(
-        '✅ LOGIN GOOGLE REALIZADO COM SUCESSO!\n\n' +
-        'A credencial foi recebida corretamente pelo GitHub Pages.'
+        'Login Google realizado. Validando no SGEEA...'
+      );
+
+
+      const enviando = document.getElementById('enviando');
+
+      if (enviando) {
+        enviando.style.display = 'block';
+      }
+
+
+      /*
+       * Envio por POST.
+       *
+       * Não usamos fetch() porque o GitHub Pages e o
+       * Apps Script estão em domínios diferentes.
+       */
+
+      const formulario = document.createElement('form');
+
+      formulario.method = 'POST';
+
+      formulario.action = SGEEA_WEB_APP_URL;
+
+      formulario.target = '_blank';
+
+
+      const campoToken = document.createElement('input');
+
+      campoToken.type = 'hidden';
+
+      campoToken.name = 'token';
+
+      campoToken.value = response.credential;
+
+
+      formulario.appendChild(campoToken);
+
+      document.body.appendChild(formulario);
+
+
+      console.log(
+        'Credencial recebida pelo Google Identity Services.'
       );
 
       console.log(
-        'Credencial recebida pelo Google Identity Services:',
-        response.credential
+        'Enviando credencial ao Web App do SGEEA por POST.'
+      );
+
+
+      formulario.submit();
+
+
+      /*
+       * O resultado do doPost será aberto em uma nova aba.
+       */
+
+      mostrarMensagem(
+        'Credencial enviada ao SGEEA. Verifique a nova aba.'
       );
     }
+
 
     function iniciarGoogle() {
 
-      if (!window.google || !google.accounts || !google.accounts.id) {
+      if (
+        !window.google ||
+        !google.accounts ||
+        !google.accounts.id
+      ) {
+
         setTimeout(iniciarGoogle, 300);
+
         return;
       }
 
+
       google.accounts.id.initialize({
+
         client_id: SGEA_GOOGLE_CLIENT_ID,
+
         callback: enviarCredencialParaSGEEA,
+
         auto_select: false,
+
         cancel_on_tap_outside: false,
+
         ux_mode: 'popup',
+
         use_fedcm_for_button: false
+
       });
 
+
       google.accounts.id.renderButton(
+
         document.getElementById('googleLogin'),
+
         {
+
           type: 'standard',
+
           theme: 'outline',
+
           size: 'large',
+
           text: 'signin_with',
+
           shape: 'rectangular',
+
           width: 300
+
         }
+
       );
 
-      mostrarMensagem('Entre com sua conta Google.');
+
+      mostrarMensagem(
+        'Entre com sua conta Google.'
+      );
     }
 
-    window.addEventListener('load', iniciarGoogle);
+
+    window.addEventListener(
+      'load',
+      iniciarGoogle
+    );
 
   </script>
 
