@@ -85,10 +85,18 @@
 
     function enviarCredencialParaSGEEA(response) {
 
-      if (!response || !response.credential) {
-        mostrarMensagem('Não foi possível obter a credencial do Google.');
-        return;
-      }
+  if (!response || !response.credential) {
+    mostrarMensagem('Não foi possível obter a credencial do Google.');
+    return;
+  }
+
+  mostrarMensagem(
+    '✅ LOGIN GOOGLE REALIZADO COM SUCESSO!\n\n' +
+    'A credencial foi recebida corretamente pelo GitHub Pages.'
+  );
+
+  console.log('Credencial recebida pelo Google Identity Services:', response.credential);
+}
 
       mostrarMensagem('Login realizado. Retornando ao SGEEA...');
 
